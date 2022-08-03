@@ -1,6 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { api } from "../constant";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { config } from "../constant";
 import { useTimer } from "react-timer-hook";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,8 +10,10 @@ export default function Board() {
   const [BTCPrice, setBTCPrice] = useState(0);
   const [startPrice, setStartPrice] = useState(0);
   const [isUp, setIsUp] = useState(0);
-  const [score, setScore] = useState(0);
   const time = new Date();
+
+  const userScore = useSelector((state) => state?.app?.userScore ?? 0)
+  const dispatch = useDispatch()
 
   const { seconds, restart } = useTimer({
     expiryTimestamp: time,
@@ -28,10 +31,22 @@ export default function Board() {
         (!isUp === -1 && currentPrice < startPrice)
       ) {
         toast.success("You won!");
-        setScore(score + 1);
+        dispatch({
+          type: "SET_APP",
+          payload: (prev = {}) => ({
+            ...(prev ?? {}),
+            userScore: userScore + 1,
+          }),
+        });
       } else {
         toast.error("You lost!");
-        setScore(score - 1);
+        dispatch({
+          type: "SET_APP",
+          payload: (prev = {}) => ({
+            ...(prev ?? {}),
+            userScore: userScore - 1,
+          }),
+        });
       }
     }
     setStartPrice(0);
@@ -49,12 +64,8 @@ export default function Board() {
   };
 
   const getBTCPrice = async () => {
-    const result = await axios.get(api.BTCPriceAPI);
+    const result = await axios.get(config.BTCPriceAPI);
     return result.data.price;
-  };
-
-  const getScore = async () => {
-    return 10;
   };
 
   useEffect(() => {
@@ -65,18 +76,10 @@ export default function Board() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const onLoad = async () => {
-      setScore(await getScore());
-    };
-    window.addEventListener("load", onLoad);
-    return () => window.removeEventListener("load", onLoad);
-  }, []);
-
   return (
     <div className="board">
       <div style={{ margin: "8rem 10rem" }}>
-        <div style={{ fontSize: "4rem" }}>Your Score: {score}</div>
+        <div style={{ fontSize: "4rem" }}>Your Score: {userScore}</div>
         <div style={{ fontSize: "3rem", marginTop: "40px" }}>
           Guess:
           <button className="guessBtn" onClick={() => guess(1)} disabled={isUp !== 0}>

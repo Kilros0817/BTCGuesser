@@ -1,11 +1,15 @@
 import "./App.css";
 import Board from "./views/Board";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 function App() {
   // React States
   const [errorMessages, setErrorMessages] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const isLogin = useSelector((state) => state?.app?.login ?? false);
+
+  const dispatch = useDispatch()
 
   // User Login info
   const database = [
@@ -39,6 +43,21 @@ function App() {
         // Invalid password
         setErrorMessages({ name: "pass", message: errors.pass });
       } else {
+        dispatch({
+          type: "SET_APP",
+          payload: (prev = {}) => ({
+            ...(prev ?? {}),
+            userScore: 10,
+          }),
+        });
+
+        dispatch({
+          type: "SET_APP",
+          payload: (prev = {}) => ({
+            ...(prev ?? {}),
+            login: true,
+          }),
+        });
         setIsSubmitted(true);
       }
     } else {
@@ -79,7 +98,7 @@ function App() {
 
   return (
     <div className="app">
-      {isSubmitted ? <Board /> : <div className="login-form">{renderForm}</div>}
+      {isLogin || isSubmitted ? <Board /> : <div className="login-form">{renderForm}</div>}
     </div>
   );
 }
