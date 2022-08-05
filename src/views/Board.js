@@ -72,7 +72,7 @@ export default function Board() {
     setStartPrice(BTCPrice);
     setIsUp(up);
     const time = new Date();
-    time.setSeconds(time.getSeconds() + 6);
+    time.setSeconds(time.getSeconds() + 60);
     restart(time);
   };
 
