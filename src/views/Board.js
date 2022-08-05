@@ -1,19 +1,22 @@
+/* eslint-disable eqeqeq */
 import React, { useEffect, useState } from "react";
+import Modal from "react-modal";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { config } from "../constant";
 import { useTimer } from "react-timer-hook";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function Board() {
   const [BTCPrice, setBTCPrice] = useState(0);
+  const [endPrice, setEndPrice] = useState(0);
   const [startPrice, setStartPrice] = useState(0);
   const [isUp, setIsUp] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   const time = new Date();
 
-  const userScore = useSelector((state) => state?.app?.userScore ?? 0)
-  const dispatch = useDispatch()
+  const userScore = useSelector((state) => state?.app?.userScore ?? 0);
+  const userName = useSelector((state) => state?.app?.userName ?? "");
+  const dispatch = useDispatch();
 
   const { seconds, restart } = useTimer({
     expiryTimestamp: time,
@@ -22,15 +25,22 @@ export default function Board() {
     },
   });
 
+  const toggleModal = () => {
+    setIsOpen(!isOpen);
+  };
+
   const checkResult = async () => {
     const currentPrice = await getBTCPrice();
-    setBTCPrice(currentPrice);
+    setEndPrice(currentPrice);
     if (isUp !== 0) {
       if (
-        (isUp === 1 && currentPrice > startPrice) ||
-        (!isUp === -1 && currentPrice < startPrice)
+        (isUp == 1 && currentPrice >= startPrice) ||
+        (!isUp == -1 && currentPrice < startPrice)
       ) {
-        toast.success("You won!");
+        axios.post(`${config.BackendBaseURL}update-score`, {
+          name: userName,
+          isUp: true,
+        });
         dispatch({
           type: "SET_APP",
           payload: (prev = {}) => ({
@@ -39,7 +49,10 @@ export default function Board() {
           }),
         });
       } else {
-        toast.error("You lost!");
+        axios.post(`${config.BackendBaseURL}update-score`, {
+          name: userName,
+          isUp: false,
+        });
         dispatch({
           type: "SET_APP",
           payload: (prev = {}) => ({
@@ -48,19 +61,19 @@ export default function Board() {
           }),
         });
       }
+      setIsOpen(true);
     }
-    setStartPrice(0);
     setTimeout(() => {
-        setIsUp(0);
+      setIsUp(0);
     }, 1000);
   };
 
   const guess = (up) => {
+    setStartPrice(BTCPrice);
     setIsUp(up);
     const time = new Date();
     time.setSeconds(time.getSeconds() + 6);
     restart(time);
-    setStartPrice(BTCPrice);
   };
 
   const getBTCPrice = async () => {
@@ -82,10 +95,18 @@ export default function Board() {
         <div style={{ fontSize: "4rem" }}>Your Score: {userScore}</div>
         <div style={{ fontSize: "3rem", marginTop: "40px" }}>
           Guess:
-          <button className="guessBtn" onClick={() => guess(1)} disabled={isUp !== 0}>
+          <button
+            className="guessBtn"
+            onClick={() => guess(1)}
+            disabled={isUp !== 0}
+          >
             Up
           </button>
-          <button className="guessBtn" onClick={() => guess(-1)} disabled={isUp !== 0}>
+          <button
+            className="guessBtn"
+            onClick={() => guess(-1)}
+            disabled={isUp !== 0}
+          >
             Down
           </button>
         </div>
@@ -107,18 +128,21 @@ export default function Board() {
           )}
         </div>
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={10000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={toggleModal}
+        contentLabel="Guess Result"
+      >
+        <div style={{ fontSize: "1.5rem" }}>Guess Result</div>
+        <div className={endPrice > startPrice ? "green result" : "red result"}>
+          You {endPrice > startPrice ? "Won!" : "Lost!"}
+        </div>
+        <div>Start Price: {(+startPrice).toLocaleString()}</div>
+        <div>End Price: {(+endPrice).toLocaleString()}</div>
+        <button className="confirm" onClick={toggleModal}>
+          Confirm
+        </button>
+      </Modal>
     </div>
   );
 }

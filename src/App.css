@@ -14,6 +14,7 @@ input[type="text"],
 input[type="password"] {
   height: 25px;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
 input[type="submit"] {
@@ -33,11 +34,13 @@ input[type="submit"]:hover {
 .button-container {
   display: flex;
   justify-content: center;
+  margin-top: 10px;
 }
 
 .login-form {
   background-color: white;
   padding: 2rem;
+  border-radius: 10px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -101,4 +104,33 @@ input[type="submit"]:hover {
 
 .red {
   color: red;
+}
+
+.sign-container {
+  color: red;
+  margin-right: 15px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.ReactModal__Content {
+  width: 350px;
+  height: fit-content;
+  margin: auto;
+  text-align: center;
+}
+
+.result {
+  font-size: 3rem;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+.confirm {
+  margin-top: 20px;
+  padding: 5px 10px;
+  background: rgb(1 239 146 / 25%);
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: 700;
 }
