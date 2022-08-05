@@ -26,6 +26,9 @@ export default function Board() {
   });
 
   const toggleModal = () => {
+    if (isOpen) {
+      setIsUp(0);
+    }
     setIsOpen(!isOpen);
   };
 
@@ -37,7 +40,7 @@ export default function Board() {
         (isUp == 1 && currentPrice >= startPrice) ||
         (!isUp == -1 && currentPrice < startPrice)
       ) {
-        axios.post(`${config.BackendBaseURL}update-score`, {
+        axios.post(`${config.BackendBaseURL}/update-score`, {
           name: userName,
           isUp: true,
         });
@@ -49,7 +52,7 @@ export default function Board() {
           }),
         });
       } else {
-        axios.post(`${config.BackendBaseURL}update-score`, {
+        axios.post(`${config.BackendBaseURL}/update-score`, {
           name: userName,
           isUp: false,
         });
@@ -63,9 +66,6 @@ export default function Board() {
       }
       setIsOpen(true);
     }
-    setTimeout(() => {
-      setIsUp(0);
-    }, 1000);
   };
 
   const guess = (up) => {
@@ -134,9 +134,21 @@ export default function Board() {
         contentLabel="Guess Result"
       >
         <div style={{ fontSize: "1.5rem" }}>Guess Result</div>
-        <div className={endPrice > startPrice ? "green result" : "red result"}>
-          You {endPrice > startPrice ? "Won!" : "Lost!"}
-        </div>
+        {(endPrice > startPrice && isUp == 1) || (endPrice <= startPrice && isUp == -1) && (
+          <div
+            className="green result"
+          >
+            You Won!
+          </div>
+        )}
+        {((endPrice > startPrice && isUp == -1) || (endPrice <= startPrice && isUp == 1)) && (
+          <div
+            className="red result"
+          >
+            You Lost!
+          </div>
+        )}
+
         <div>Start Price: {(+startPrice).toLocaleString()}</div>
         <div>End Price: {(+endPrice).toLocaleString()}</div>
         <button className="confirm" onClick={toggleModal}>
