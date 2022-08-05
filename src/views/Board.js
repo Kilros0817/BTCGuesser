@@ -134,7 +134,7 @@ export default function Board() {
         contentLabel="Guess Result"
       >
         <div style={{ fontSize: "1.5rem" }}>Guess Result</div>
-        {(endPrice > startPrice && isUp == 1) || (endPrice <= startPrice && isUp == -1) && (
+        {((endPrice > startPrice && isUp == 1) || (endPrice <= startPrice && isUp == -1)) && (
           <div
             className="green result"
           >
